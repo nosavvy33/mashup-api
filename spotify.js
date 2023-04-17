@@ -12,7 +12,6 @@ const getAccessTokenFromRefreshToken = async (refreshToken) => {
     }
 };
 
-
 const getUserId = async (accessToken) => {
     const userResponse = await axios({
         method: "get",
@@ -100,19 +99,54 @@ const getTopTracks = async (accessToken, artistId) => {
 const getArtistTopTracks = async (artistName, accessToken) => {
     try {
         const artistId = await getArtistId(accessToken, artistName);
+
+        if (!artistId) {
+            console.log(`Artist "${artistName}" not found.`);
+            return [];
+        }
+
         const topTracks = await getTopTracks(accessToken, artistId);
 
         console.log(`Top tracks by ${artistName}:`);
         topTracks.forEach((track, index) => {
             console.log(`${index + 1}. ${track.name}`);
         });
+
+        return topTracks;
     } catch (error) {
         console.error("Error fetching top tracks:", error.message);
     }
 };
 
+async function createPlaylist(userId, accessToken, playlistName, trackUris) {
+    console.log(`About to create playtlist with ${userId}, token ${accessToken}, name ${playlistName} and trackUris ${trackUris}`);
+
+    // Create a new playlist
+    const createPlaylistResponse = await axios.post(
+        `https://api.spotify.com/v1/users/${userId}/playlists`,
+        { name: playlistName },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    const playlistId = createPlaylistResponse.data.id;
+
+    console.log(`playListCreated ${playlistId}`);
+
+    // Add tracks to the new playlist
+    await axios.post(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        { uris: trackUris },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    console.log(`Playlist "${playlistName}" created with ${trackUris.length} tracks.`);
+}
+
+
 
 module.exports = {
     getArtistTopTracks,
-    getAccessTokenFromRefreshToken
+    getAccessTokenFromRefreshToken,
+    createPlaylist,
+    getUserId
 };

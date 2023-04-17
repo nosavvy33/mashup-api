@@ -1,26 +1,31 @@
-const { getArtistTopTracks, getAccessTokenFromRefreshToken } = require("./spotify");
+const { getArtistTopTracks, getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./spotify");
+const { processArtists, getRandomTracks } = require("./artistProcessor");
+const playlistName = "Random Tracks from Artists";
 
-const getArguments = () => {
-    const args = process.argv.slice(2);
-    const accessToken = args[0];
-    const refreshToken = args[1];
-    const artistName = args.slice(2).join(' ');
+(async () => {
+    try {
+        const [accessToken, refreshToken, ...artistNames] = process.argv.slice(2);
+        if (!accessToken || !refreshToken || artistNames.length === 0) {
+            console.error("Please provide access token, refresh token, and artist name as arguments.");
+            process.exit(1);
+        }
 
-    return { accessToken, refreshToken, artistName };
-};
+        const updatedAccessToken = await getAccessTokenFromRefreshToken(refreshToken);
 
-const { accessToken, refreshToken, artistName } = getArguments();
+        const topTracks = await processArtists(artistNames, updatedAccessToken);
 
-if (!accessToken || !refreshToken || !artistName) {
-    console.error("Please provide access token, refresh token, and artist name as arguments.");
-    process.exit(1);
-}
+        console.log(`About to randomize ${topTracks.length} tracks`)
+        console.log(`Tracks ${topTracks}`);
 
-const fetchArtistTopTracks = async () => {
-    const freshAccessToken = await getAccessTokenFromRefreshToken(refreshToken);
-    getArtistTopTracks(artistName, freshAccessToken);
-};
+        const randomTracks = getRandomTracks(topTracks, 10 * artistNames.length);
 
-fetchArtistTopTracks();
+        console.log(`Creating playlist with uris ${randomTracks}`);
 
+        const userId = await getUserId(updatedAccessToken);
+        await createPlaylist(userId, accessToken, playlistName, randomTracks.map((track) => track.uri));
+
+    } catch (error) {
+        console.error("Error in main function:", error.message);
+    }
+})();
 

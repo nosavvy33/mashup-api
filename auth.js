@@ -26,7 +26,7 @@ app.get("/login", (req, res) => {
     const state = generateRandomString(16);
     res.cookie("spotify_auth_state", state);
 
-    const scope = "user-top-read user-library-read";
+    const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
 
     res.redirect(
         "https://accounts.spotify.com/authorize?" +
