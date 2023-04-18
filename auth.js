@@ -45,48 +45,50 @@ app.get("/login", (req, res) => {
     );
 });
 
-app.get("/callback", async (req, res) => {
-    const code = req.query.code || null;
-    const state = req.query.state || null;
-    const storedState = req.cookies ? req.cookies.spotify_auth_state : null;
+function startAuthProcess() {
+    return new Promise((resolve) => {
+        app.get("/callback", async (req, res) => {
+            const code = req.query.code || null;
+            const state = req.query.state || null;
+            const storedState = req.cookies ? req.cookies.spotify_auth_state : null;
 
-    if (state === null || state !== storedState) {
-        res.redirect("/#/error/state_mismatch");
-    } else {
-        res.clearCookie("spotify_auth_state");
+            if (state === null || state !== storedState) {
+                res.redirect("/#/error/state_mismatch");
+            } else {
+                res.clearCookie("spotify_auth_state");
 
-        try {
-            const authResponse = await axios({
-                method: "post",
-                url: "https://accounts.spotify.com/api/token",
-                params: {
-                    code: code,
-                    redirect_uri: redirectUri,
-                    grant_type: "authorization_code",
-                },
-                headers: {
-                    Authorization:
-                        "Basic " +
-                        Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
+                try {
+                    const authResponse = await axios({
+                        method: "post",
+                        url: "https://accounts.spotify.com/api/token",
+                        params: {
+                            code: code,
+                            redirect_uri: redirectUri,
+                            grant_type: "authorization_code",
+                        },
+                        headers: {
+                            Authorization:
+                                "Basic " +
+                                Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                    });
 
-            const accessToken = authResponse.data.access_token;
-            const refreshToken = authResponse.data.refresh_token;
+                    const accessToken = authResponse.data.access_token;
+                    const refreshToken = authResponse.data.refresh_token;
 
-            res.redirect(
-                "/#/success/" +
-                encodeURIComponent(accessToken) +
-                "/" +
-                encodeURIComponent(refreshToken)
-            );
-        } catch (error) {
-            console.error("Error fetching access token:", error.message);
-            res.redirect("/#/error/invalid_token");
-        }
-    }
-});
+                    // Resolve the promise with the access token and refresh token
+                    resolve({ accessToken, refreshToken });
+
+                    res.send('Access and refresh tokens fetched successfully. You can close this window.');
+                } catch (error) {
+                    console.error("Error fetching access token:", error.message);
+                    res.redirect("/#/error/invalid_token");
+                }
+            }
+        });
+    });
+}
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
@@ -122,4 +124,5 @@ const getAccessToken = async (refreshToken) => {
 
 module.exports = {
     getAccessToken,
+    startAuthProcess
 };
