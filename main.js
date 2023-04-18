@@ -2,6 +2,10 @@ const { getArtistTopTracks, getAccessTokenFromRefreshToken, getUserId, createPla
 const { processArtists, getRandomTracks } = require("./artistProcessor");
 const playlistName = "Random Tracks from Artists";
 
+// add command to spice up with recommended tracks (most listened that are not hearted)
+// make playlist tracks length an args, default to 10 x artist 
+// make playlist duration an args
+
 (async () => {
     try {
         const [accessToken, refreshToken, ...artistNames] = process.argv.slice(2);
