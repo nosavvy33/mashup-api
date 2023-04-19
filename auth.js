@@ -1,6 +1,7 @@
 const axios = require("axios");
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const logger = require('./logger');
 require("dotenv").config();
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -82,7 +83,7 @@ function startAuthProcess() {
 
                     res.send('Access and refresh tokens fetched successfully. You can close this window.');
                 } catch (error) {
-                    console.error("Error fetching access token:", error.message);
+                    logger.error(`Error fetching access token:, ${error.message}`);
                     res.redirect("/#/error/invalid_token");
                 }
             }
@@ -91,7 +92,7 @@ function startAuthProcess() {
 }
 
 app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+    logger.debug("Server is running on port 3000");
 });
 
 const getAccessToken = async (refreshToken) => {
@@ -117,7 +118,7 @@ const getAccessToken = async (refreshToken) => {
             throw new Error("Failed to get access token from refresh token.");
         }
     } catch (error) {
-        console.error("Error fetching access token:", error.message);
+        logger.error(`Error fetching access token:, ${error.message}`);
         throw error;
     }
 };

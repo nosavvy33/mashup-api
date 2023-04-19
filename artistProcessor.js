@@ -1,35 +1,10 @@
 const { from, lastValueFrom, forkJoin } = require("rxjs");
-// const { forkJoin } = require("rxjs/operators");
 const { getArtistTopTracks } = require("./spotify");
-
-// const processArtists = async (artistNames, accessToken) => {
-//     const observables = artistNames.map((artistName) => {
-//         console.log(`\nFetching top tracks for ${artistName}:`);
-//         return from(getArtistTopTracks(artistName, accessToken));
-//     });
-
-//     await forkJoin(observables).toPromise();
-// };
-
-// async function processArtists(artistNames, accessToken) {
-//     const allTopTracks = [];
-
-//     for (const artist of artistNames) { console.log(`About to fetch data for ${artist}`) }
-
-//     for (const artistName of artistNames) {
-//         console.log(`\nFetching top tracks for ${artistName}:`);
-//         const topTracks = await getArtistTopTracks(artistName, accessToken);
-//         allTopTracks.push(...topTracks);
-//     }
-
-//     console.log(`All top tracks length ${allTopTracks.length}`);
-
-//     return allTopTracks;
-// }
+const logger = require('./logger');
 
 async function processArtists(artistNames, accessToken) {
     const artistsTopTracks$ = artistNames.map(async (artistName) => {
-        console.log(`\nFetching top tracks for ${artistName}:`);
+        logger.debug(`\nFetching top tracks for ${artistName}:`);
         const topTracks = await getArtistTopTracks(artistName, accessToken);
         return topTracks;
     });
