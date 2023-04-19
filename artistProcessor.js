@@ -4,7 +4,7 @@ const logger = require('./logger');
 
 async function processArtists(artistNames, accessToken) {
     const artistsTopTracks$ = artistNames.map(async (artistName) => {
-        logger.debug(`\nFetching top tracks for ${artistName}:`);
+        logger.debug(`Fetching top tracks for ${artistName}:`);
         const topTracks = await getArtistTopTracks(artistName, accessToken);
         return topTracks;
     });
