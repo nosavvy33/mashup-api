@@ -24,16 +24,13 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run your script
-      env:
-        SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-      run: node main.js
-
     - name: Install pkg
       run: npm install -g pkg
 
     - name: Build executable
+      env:
+        SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
       run: pkg . --output dist/spotify-playlist-generator-${{ runner.os }}
 
     - name: Upload artifacts
