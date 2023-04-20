@@ -6,6 +6,23 @@ on:
       - 'v*'
 
 jobs:
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
   build-and-release:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,31 +56,19 @@ jobs:
         name: spotify-playlist-generator-${{ runner.os }}
         path: dist/spotify-playlist-generator-${{ runner.os }}
 
-    - name: Create Release
-      if: matrix.os == 'ubuntu-latest'
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
     - name: Download all artifacts
       if: matrix.os == 'ubuntu-latest'
       uses: actions/download-artifact@v2
       with:
         path: dist/
 
-    - name: Upload Release Asset
-      if: matrix.os == 'ubuntu-latest'
+    - name: Upload asset to release
+      if: success()
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/spotify-playlist-generator-${{ runner.os }}
-        asset_name: spotify-playlist-generator-${{ runner.os }}
-        asset_content_type: application/octet-stream
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./dist/spotify-playlist-generator-${{ matrix.os }}.zip
+        asset_name: spotify-playlist-generator-${{ matrix.os }}.zip
+        asset_content_type: application/zip
