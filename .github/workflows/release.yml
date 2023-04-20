@@ -28,7 +28,7 @@ jobs:
       env:
         SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
         SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-      run: node your-script.js
+      run: node main.js
 
     - name: Install pkg
       run: npm install -g pkg
