@@ -1,4 +1,3 @@
-const prompts = require('prompts');
 const { getArtistTopTracks, getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./spotify");
 const { startAuthProcess } = require('./auth');
 const { processArtists, getRandomTracks } = require("./artistProcessor");
@@ -32,21 +31,6 @@ const { loopPrompt } = require("./prompts/systemPrompts");
             const accessToken = tokenData.accessToken;
             const refreshToken = tokenData.refreshToken;
 
-            // const questions = [
-            //     {
-            //         type: 'list',
-            //         name: 'artistNames',
-            //         message: 'Enter the artist names (comma-separated):',
-            //         separator: ','
-            //     },
-            //     {
-            //         type: 'text',
-            //         name: 'playlistName',
-            //         message: 'Enter the playlist name (leave empty for a default name):',
-            //     },
-            // ];
-
-            // const { artistNames, playlistName } = await prompts(questions);
             const { artistNames, playlistName } = await playlistCreationPrompt();
 
             const artists = artistNames.map(artist => artist.trim());
@@ -79,14 +63,6 @@ const { loopPrompt } = require("./prompts/systemPrompts");
         }
     }
 
-    // After creating a playlist, ask the user if they want to create another one
-    // const response = await prompts({
-    //     type: 'confirm',
-    //     name: 'continue',
-    //     message: 'Do you want to create another playlist?',
-    // });
-
-    // shouldContinue = response.continue;
     shouldContinue = await loopPrompt();
 })();
 
