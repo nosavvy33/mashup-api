@@ -41,8 +41,10 @@ const getArtistId = async (accessToken, artistName) => {
 
         if (response.data.artists.items.length > 0) {
             const artistId = response.data.artists.items[0].id;
-            logger.info(`Artist full ${response.data.artists.items[0]}`)
+            const artistName = response.data.artists.items[0].name;
+
             logger.debug(`Artist ID for ${artistName}: ${artistId}`);
+
             return artistId;
         } else {
             logger.error(`Could not find artist with name "${artistName}"`);

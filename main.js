@@ -5,6 +5,9 @@ const { processArtists, getRandomTracks } = require("./artistProcessor");
 const defaultPlaylistName = "Random Tracks from Artists";
 const logger = require('./logger');
 const { readTokenFile, writeTokenFile, isTokenValid } = require('./token-manager');
+const { playlistCreationPrompt } = require("./prompts/userPrompts");
+const { loopPrompt } = require("./prompts/systemPrompts");
+
 
 // add command to spice up with recommended tracks (most listened that are not hearted)
 // make playlist tracks length an args, default to 10 x artist 
@@ -29,21 +32,23 @@ const { readTokenFile, writeTokenFile, isTokenValid } = require('./token-manager
             const accessToken = tokenData.accessToken;
             const refreshToken = tokenData.refreshToken;
 
-            const questions = [
-                {
-                    type: 'list',
-                    name: 'artistNames',
-                    message: 'Enter the artist names (comma-separated):',
-                    separator: ','
-                },
-                {
-                    type: 'text',
-                    name: 'playlistName',
-                    message: 'Enter the playlist name (leave empty for a default name):',
-                },
-            ];
+            // const questions = [
+            //     {
+            //         type: 'list',
+            //         name: 'artistNames',
+            //         message: 'Enter the artist names (comma-separated):',
+            //         separator: ','
+            //     },
+            //     {
+            //         type: 'text',
+            //         name: 'playlistName',
+            //         message: 'Enter the playlist name (leave empty for a default name):',
+            //     },
+            // ];
 
-            const { artistNames, playlistName } = await prompts(questions);
+            // const { artistNames, playlistName } = await prompts(questions);
+            const { artistNames, playlistName } = await playlistCreationPrompt();
+
             const artists = artistNames.map(artist => artist.trim());
 
             // If the user didn't provide a playlist name, create a default name
@@ -75,12 +80,13 @@ const { readTokenFile, writeTokenFile, isTokenValid } = require('./token-manager
     }
 
     // After creating a playlist, ask the user if they want to create another one
-    const response = await prompts({
-        type: 'confirm',
-        name: 'continue',
-        message: 'Do you want to create another playlist?',
-    });
+    // const response = await prompts({
+    //     type: 'confirm',
+    //     name: 'continue',
+    //     message: 'Do you want to create another playlist?',
+    // });
 
-    shouldContinue = response.continue;
+    // shouldContinue = response.continue;
+    shouldContinue = await loopPrompt();
 })();
 
