@@ -4,12 +4,16 @@ const { combine, timestamp, printf } = format;
 
 // Custom format for console output
 const consoleFormat = printf(({ level, message, timestamp }) => {
-    return `${timestamp} ${level.toUpperCase()}: ${message}`;
+    const formattedMessage = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+
+    return `${timestamp} ${level.toUpperCase()}: ${formattedMessage}`;
 });
 
 // Custom format for file output
 const fileFormat = printf(({ level, message, timestamp }) => {
-    return `${timestamp} [${level}]: ${message}`;
+    const formattedMessage = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+
+    return `${timestamp} [${level}]: ${formattedMessage}`;
 });
 
 // Create logger with different transports
