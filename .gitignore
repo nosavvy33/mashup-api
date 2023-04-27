@@ -73,6 +73,9 @@ typings/
 .env
 .env.test
 
+# token files
+token.*
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
