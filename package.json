@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pkg . --out-path dist/"
+    "build": "pkg . --out-path dist/",
+    "start": "node main.js"
   },
   "bin": {
     "spotify-playlist-generator": "./main.js"
