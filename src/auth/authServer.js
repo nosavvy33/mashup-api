@@ -1,8 +1,7 @@
-import axios from "axios";
-import express from "express";
-import cookieParser from "cookie-parser";
-import logger from '../logger/logger';
-const open = require("open");
+const axios = require("axios");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const logger = require('../logger/logger');
 require("dotenv").config();
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -25,31 +24,26 @@ const generateRandomString = (length) => {
 };
 
 app.get("/login", (req, res) => {
-    // const state = generateRandomString(16);
-    // res.cookie("spotify_auth_state", state);
+    const state = generateRandomString(16);
+    res.cookie("spotify_auth_state", state);
 
-    // const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
+    const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
 
-    // res.redirect(
-    //     "https://accounts.spotify.com/authorize?" +
-    //     "response_type=code&" +
-    //     "client_id=" +
-    //     clientId +
-    //     "&" +
-    //     "scope=" +
-    //     encodeURIComponent(scope) +
-    //     "&" +
-    //     "redirect_uri=" +
-    //     encodeURIComponent(redirectUri) +
-    //     "&" +
-    //     "state=" +
-    //     state
-    // );
-
-    const authUrl = generateAuthUrl(res);
-    res.redirect(authUrl);
-    // Open the login URL in the Chrome browser
-    open(authUrl, { app: 'chrome' });
+    res.redirect(
+        "https://accounts.spotify.com/authorize?" +
+        "response_type=code&" +
+        "client_id=" +
+        clientId +
+        "&" +
+        "scope=" +
+        encodeURIComponent(scope) +
+        "&" +
+        "redirect_uri=" +
+        encodeURIComponent(redirectUri) +
+        "&" +
+        "state=" +
+        state
+    );
 });
 
 function generateAuthUrl(res) {
@@ -152,5 +146,6 @@ const getAccessToken = async (refreshToken) => {
 
 module.exports = {
     getAccessToken,
-    startAuthProcess
+    startAuthProcess,
+    generateAuthUrl
 };

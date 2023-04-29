@@ -1,12 +1,10 @@
-const { getArtistTopTracks, getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./spotify");
-const { startAuthProcess } = require('./auth');
+const { getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./playlist/spotify");
 const { processArtists, getRandomTracks } = require("./playlist/artistProcessor");
 const defaultPlaylistName = "Random Tracks from Artists";
 const logger = require('./logger/logger');
-const { readTokenFile, writeTokenFile, isTokenValid } = require('./token-manager');
-const { playlistCreationPrompt } = require("./src/prompts/userPrompts");
-const { loopPrompt } = require("./src/prompts/systemPrompts");
-
+const { playlistCreationPrompt } = require("./prompts/userPrompts");
+const { loopPrompt } = require("./prompts/systemPrompts");
+const { getTokens } = require('./auth/token-manager');
 
 // add command to spice up with recommended tracks (most listened that are not hearted)
 // make playlist tracks length an args, default to 10 x artist 
@@ -17,19 +15,7 @@ const { loopPrompt } = require("./src/prompts/systemPrompts");
 
     while (shouldContinue) {
         try {
-            let tokenData = readTokenFile();
-            logger.info(`Token data ${tokenData.refreshToken}`)
-            logger.info(`Token validation ${await isTokenValid(tokenData.access_token)}`)
-
-            if (!tokenData || !(await isTokenValid(tokenData.accessToken))) {
-                logger.info('Please open http://localhost:3000/login in your browser to start the authorization process.');
-                // Start the authentication flow and update the token data
-                tokenData = await startAuthProcess();
-                writeTokenFile(tokenData);
-            }
-
-            const accessToken = tokenData.accessToken;
-            const refreshToken = tokenData.refreshToken;
+            const { accessToken, refreshToken } = await getTokens();
 
             const { artistNames, playlistName } = await playlistCreationPrompt();
 

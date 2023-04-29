@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const logger = require('./logger');
+const logger = require('../logger/logger');
+const { startAuthProcess } = require('./authServer');
 
 const TOKEN_FILE_PATH = path.join(__dirname, 'token.json');
 
@@ -32,4 +33,21 @@ async function isTokenValid(accessToken) {
     }
 }
 
-module.exports = { readTokenFile, writeTokenFile, isTokenValid };
+async function getTokens() {
+    let tokenData = readTokenFile();
+    logger.info(`Token data ${tokenData.refreshToken}`)
+    logger.info(`Token validation ${await isTokenValid(tokenData.access_token)}`)
+
+    if (!tokenData || !(await isTokenValid(tokenData.accessToken))) {
+        logger.info('Please open http://localhost:3000/login in your browser to start the authorization process.');
+        // Start the authentication flow and update the token data
+        tokenData = await startAuthProcess();
+        writeTokenFile(tokenData);
+    }
+
+    return { accessToken: tokenData.accessToken, refreshToken: tokenData.refreshToken };
+    // const accessToken = tokenData.accessToken;
+    // const refreshToken = tokenData.refreshToken;
+}
+
+module.exports = { getTokens };
