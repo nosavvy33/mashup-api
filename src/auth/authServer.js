@@ -23,6 +23,27 @@ const generateRandomString = (length) => {
     return text;
 };
 
+function generateAuthUrl(res) {
+    const state = generateRandomString(16);
+    res.cookie("spotify_auth_state", state);
+
+    const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
+
+    return "https://accounts.spotify.com/authorize?" +
+        "response_type=code&" +
+        "client_id=" +
+        clientId +
+        "&" +
+        "scope=" +
+        encodeURIComponent(scope) +
+        "&" +
+        "redirect_uri=" +
+        encodeURIComponent(redirectUri) +
+        "&" +
+        "state=" +
+        state
+}
+
 app.get("/login", (req, res) => {
     const state = generateRandomString(16);
     res.cookie("spotify_auth_state", state);
@@ -45,27 +66,6 @@ app.get("/login", (req, res) => {
         state
     );
 });
-
-function generateAuthUrl(res) {
-    const state = generateRandomString(16);
-    res.cookie("spotify_auth_state", state);
-
-    const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
-
-    return "https://accounts.spotify.com/authorize?" +
-        "response_type=code&" +
-        "client_id=" +
-        clientId +
-        "&" +
-        "scope=" +
-        encodeURIComponent(scope) +
-        "&" +
-        "redirect_uri=" +
-        encodeURIComponent(redirectUri) +
-        "&" +
-        "state=" +
-        state
-}
 
 function startAuthProcess() {
     return new Promise((resolve) => {
@@ -112,10 +112,6 @@ function startAuthProcess() {
     });
 }
 
-app.listen(3000, () => {
-    logger.debug("Server is running on port 3000");
-});
-
 const getAccessToken = async (refreshToken) => {
     try {
         const response = await axios({
@@ -143,6 +139,10 @@ const getAccessToken = async (refreshToken) => {
         throw error;
     }
 };
+
+app.listen(3000, () => {
+    logger.debug("Server is running on port 3000");
+});
 
 module.exports = {
     getAccessToken,

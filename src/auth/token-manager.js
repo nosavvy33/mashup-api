@@ -46,8 +46,6 @@ async function getTokens() {
     }
 
     return { accessToken: tokenData.accessToken, refreshToken: tokenData.refreshToken };
-    // const accessToken = tokenData.accessToken;
-    // const refreshToken = tokenData.refreshToken;
 }
 
 module.exports = { getTokens };
