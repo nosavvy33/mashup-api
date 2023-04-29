@@ -1,7 +1,7 @@
 const axios = require("axios");
 require("dotenv").config();
-const { getAccessToken } = require("./auth");
-const logger = require('./logger/logger');
+const { getAccessToken } = require("../auth/authServer");
+const logger = require('../logger/logger');
 
 const getAccessTokenFromRefreshToken = async (refreshToken) => {
     try {
