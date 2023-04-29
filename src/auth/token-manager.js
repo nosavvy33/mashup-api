@@ -19,6 +19,7 @@ function writeTokenFile(tokenData) {
     fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokenData));
 }
 
+// can be replaced with spotify-api.getUserId
 async function isTokenValid(accessToken) {
     try {
         const response = await axios.get('https://api.spotify.com/v1/me', {
