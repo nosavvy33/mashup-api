@@ -9,7 +9,8 @@ const loopPromptsScript = [
 ];
 
 async function loopPrompt() {
-    await prompts(loopPromptsScript);
+    var confirm = await prompts(loopPromptsScript);
+    return confirm;
 }
 
 module.exports = { loopPrompt }
