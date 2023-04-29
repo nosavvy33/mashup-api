@@ -8,6 +8,8 @@ const loopPromptsScript = [
     }
 ];
 
-module.exports.loopPrompt = async () => {
+async function loopPrompt() {
     await prompts(loopPromptsScript);
 }
+
+module.exports = { loopPrompt }

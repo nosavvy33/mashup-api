@@ -14,7 +14,9 @@ const playlistCreationPromptsScript = [
     },
 ];
 
-module.exports.playlistCreationPrompt = async () => {
+async function playlistCreationPrompt() {
     await prompts(playlistCreationPromptsScript)
 }
+
+module.exports = { playlistCreationPrompt }
 
