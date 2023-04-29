@@ -1,6 +1,6 @@
 const { from, lastValueFrom, forkJoin } = require("rxjs");
 const { getArtistTopTracks } = require("./spotify");
-const logger = require('./logger');
+const logger = require('../logger/logger');
 
 async function processArtists(artistNames, accessToken) {
     const artistsTopTracks$ = artistNames.map(async (artistName) => {

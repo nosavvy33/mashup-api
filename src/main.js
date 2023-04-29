@@ -1,11 +1,11 @@
 const { getArtistTopTracks, getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./spotify");
 const { startAuthProcess } = require('./auth');
-const { processArtists, getRandomTracks } = require("./artistProcessor");
+const { processArtists, getRandomTracks } = require("./playlist/artistProcessor");
 const defaultPlaylistName = "Random Tracks from Artists";
-const logger = require('./logger');
+const logger = require('./logger/logger');
 const { readTokenFile, writeTokenFile, isTokenValid } = require('./token-manager');
-const { playlistCreationPrompt } = require("./prompts/userPrompts");
-const { loopPrompt } = require("./prompts/systemPrompts");
+const { playlistCreationPrompt } = require("./src/prompts/userPrompts");
+const { loopPrompt } = require("./src/prompts/systemPrompts");
 
 
 // add command to spice up with recommended tracks (most listened that are not hearted)
