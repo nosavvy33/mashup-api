@@ -2,10 +2,10 @@ const { lastValueFrom, forkJoin } = require("rxjs");
 const { getArtistTopTracks } = require("../spotify/spotify-api");
 const logger = require('../logger/logger');
 
-async function getTracksByArtists(artistNames, accessToken) {
+async function getTracksByArtists(artistNames) {
     const artistsTopTracks$ = artistNames.map(async (artistName) => {
         logger.debug(`Fetching top tracks for ${artistName}:`);
-        const topTracks = await getArtistTopTracks(artistName, accessToken);
+        const topTracks = await getArtistTopTracks(artistName);
         return topTracks;
     });
 
@@ -18,8 +18,8 @@ const getRandomTracks = (tracks, limit = 10) => {
     return shuffledTracks.slice(0, limit);
 }
 
-async function getTracksForPlaylist(artistNames, accessToken) {
-    const topTracks = await getTracksByArtists(artistNames, accessToken);
+async function getTracksForPlaylist(artistNames) {
+    const topTracks = await getTracksByArtists(artistNames);
 
     logger.debug(`About to randomize ${topTracks.length} tracks`)
     logger.debug(`Tracks ${topTracks}`);

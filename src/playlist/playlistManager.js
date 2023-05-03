@@ -4,7 +4,7 @@ const { initApiClient } = require("../spotify/apiClient");
 const defaultPlaylistName = "Random Tracks from Artists";
 const logger = require('../logger/logger');
 
-async function manageCreatePlaylist(artistNames, playlistName, accessToken, refreshToken) {
+async function manageCreatePlaylist(artistNames, playlistName, refreshToken) {
     const finalPlaylistName = playlistName || defaultPlaylistNameParser(artistNames);
 
     logger.info(`Starting to process playlist ${finalPlaylistName}`);
@@ -14,11 +14,11 @@ async function manageCreatePlaylist(artistNames, playlistName, accessToken, refr
     initApiClient(updatedAccessToken);
     const userId = await getUserId();
 
-    var randomTracks = await getTracksForPlaylist(artistNames, updatedAccessToken);
+    var randomTracks = await getTracksForPlaylist(artistNames);
     logger.debug(`Creating playlist with uris ${randomTracks}`);
     logger.info(`Creating playlist with ${randomTracks.length} tracks`);
 
-    await createPlaylist(userId, updatedAccessToken, finalPlaylistName, randomTracks.map((track) => track.uri));
+    await createPlaylist(userId, finalPlaylistName, randomTracks.map((track) => track.uri));
 }
 
 function defaultPlaylistNameParser(artistNames) {

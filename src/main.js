@@ -17,7 +17,7 @@ const { manageCreatePlaylist } = require("./playlist/playlistManager");
 
             const { artistNames, playlistName } = await playlistCreationPrompt();
 
-            await manageCreatePlaylist(artistNames, playlistName, accessToken, refreshToken);
+            await manageCreatePlaylist(artistNames, playlistName, refreshToken);
         } catch (error) {
             logger.error(`Error in main function: ${error.message}`);
         }

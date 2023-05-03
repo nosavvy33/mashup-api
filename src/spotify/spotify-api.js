@@ -1,4 +1,3 @@
-const axios = require("axios");
 require("dotenv").config();
 const { getAccessToken } = require("../auth/authServer");
 const logger = require('../logger/logger');
@@ -21,7 +20,7 @@ const getUserId = async () => {
     return userResponse.data.id;
 };
 
-const getArtistId = async (accessToken, artistName) => {
+const getArtistId = async (artistName) => {
     try {
         const apiClient = getApiClient();
         const response = await apiClient(GetArtistRequest(artistName));
@@ -42,7 +41,7 @@ const getArtistId = async (accessToken, artistName) => {
     }
 };
 
-const getAllLikedTracks = async (accessToken, offset = 0, limit = 50, allTracks = []) => {
+const getAllLikedTracks = async (offset = 0, limit = 50, allTracks = []) => {
     try {
         const apiClient = getApiClient();
         const response = await apiClient(GetLikedTracksRequest(limit, offset));
@@ -51,7 +50,7 @@ const getAllLikedTracks = async (accessToken, offset = 0, limit = 50, allTracks 
         allTracks.push(...likedTracks);
 
         if (response.data.next) {
-            return getAllLikedTracks(accessToken, offset + limit, limit, allTracks);
+            return getAllLikedTracks(offset + limit, limit, allTracks);
         } else {
             return allTracks;
         }
@@ -61,8 +60,8 @@ const getAllLikedTracks = async (accessToken, offset = 0, limit = 50, allTracks 
     }
 };
 
-async function createPlaylist(userId, accessToken, playlistName, trackUris) {
-    logger.debug(`About to create playtlist with ${userId}, token ${accessToken}, name ${playlistName} and trackUris ${trackUris}`);
+async function createPlaylist(userId, playlistName, trackUris) {
+    logger.debug(`About to create playtlist with ${userId}, name ${playlistName} and trackUris ${trackUris}`);
 
     const apiClient = getApiClient();
     const createPlaylistResponse = await apiClient(CreatePlaylistRequest(userId, playlistName));
@@ -76,9 +75,9 @@ async function createPlaylist(userId, accessToken, playlistName, trackUris) {
     logger.info(`Playlist "${playlistName}" created with ${trackUris.length} tracks.`);
 }
 
-const getTopTracks = async (accessToken, artistId) => {
+const getTopTracks = async (artistId) => {
     try {
-        const likedTracks = await getAllLikedTracks(accessToken);
+        const likedTracks = await getAllLikedTracks();
         logger.debug(`Total liked tracks: ${likedTracks.length}`);
 
         const artistTopTracks = likedTracks
@@ -92,16 +91,16 @@ const getTopTracks = async (accessToken, artistId) => {
     }
 };
 
-const getArtistTopTracks = async (artistName, accessToken) => {
+const getArtistTopTracks = async (artistName) => {
     try {
-        const artistId = await getArtistId(accessToken, artistName);
+        const artistId = await getArtistId(artistName);
 
         if (!artistId) {
             logger.debug(`Artist "${artistName}" not found.`);
             return [];
         }
 
-        const topTracks = await getTopTracks(accessToken, artistId);
+        const topTracks = await getTopTracks(artistId);
 
         logger.debug(`Top tracks by ${artistName}:`);
         topTracks.forEach((track, index) => {
