@@ -30,6 +30,7 @@ async function isTokenValid(accessToken) {
         logger.info(`Stored token validation resulted in ${response.status}`)
         return response.status === 200;
     } catch (error) {
+        logger.info("Current token is invalid, need to re-login")
         return false;
     }
 }
@@ -37,11 +38,10 @@ async function isTokenValid(accessToken) {
 async function getTokens() {
     let tokenData = readTokenFile();
     logger.info(`Token data ${tokenData.refreshToken}`)
-    logger.info(`Token validation ${await isTokenValid(tokenData.access_token)}`)
+    logger.info(`Token validation ${await isTokenValid(tokenData.accessToken)}`)
 
-    if (!tokenData || !(await isTokenValid(tokenData.accessToken))) {
+    if (!(await isTokenValid(tokenData.accessToken))) {
         logger.info('Please open http://localhost:3000/login in your browser to start the authorization process.');
-        // Start the authentication flow and update the token data
         tokenData = await startAuthProcess();
         writeTokenFile(tokenData);
     }

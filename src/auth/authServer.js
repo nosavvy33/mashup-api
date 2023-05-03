@@ -130,6 +130,7 @@ const getAccessToken = async (refreshToken) => {
         });
 
         if (response.status === 200 && response.data.access_token) {
+            logger.info(`Retrieved accessToken with result ${response.status}`);
             return response.data.access_token;
         } else {
             throw new Error("Failed to get access token from refresh token.");
