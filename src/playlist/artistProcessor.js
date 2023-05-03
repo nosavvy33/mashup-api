@@ -1,5 +1,5 @@
 const { lastValueFrom, forkJoin } = require("rxjs");
-const { getArtistTopTracks } = require("./spotify-api");
+const { getArtistTopTracks } = require("../spotify/spotify-api");
 const logger = require('../logger/logger');
 
 async function getTracksByArtists(artistNames, accessToken) {

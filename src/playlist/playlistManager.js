@@ -1,5 +1,6 @@
-const { getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("./spotify-api");
+const { getAccessTokenFromRefreshToken, getUserId, createPlaylist } = require("../spotify/spotify-api");
 const { getTracksForPlaylist } = require("./artistProcessor");
+const { initApiClient } = require("../spotify/apiClient");
 const defaultPlaylistName = "Random Tracks from Artists";
 const logger = require('../logger/logger');
 
@@ -10,7 +11,8 @@ async function manageCreatePlaylist(artistNames, playlistName, accessToken, refr
 
     // refactor use of accessToken and refreshToken like in a spotify-api-manager
     const updatedAccessToken = await getAccessTokenFromRefreshToken(refreshToken);
-    const userId = await getUserId(updatedAccessToken);
+    initApiClient(updatedAccessToken);
+    const userId = await getUserId();
 
     var randomTracks = await getTracksForPlaylist(artistNames, updatedAccessToken);
     logger.debug(`Creating playlist with uris ${randomTracks}`);
