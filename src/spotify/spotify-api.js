@@ -60,7 +60,7 @@ const getAllLikedTracks = async (offset = 0, limit = 50, allTracks = []) => {
     }
 };
 
-async function createPlaylist(userId, playlistName, trackUris) {
+const createPlaylist = async (userId, playlistName, trackUris) => {
     logger.debug(`About to create playtlist with ${userId}, name ${playlistName} and trackUris ${trackUris}`);
 
     const apiClient = getApiClient();
@@ -75,47 +75,10 @@ async function createPlaylist(userId, playlistName, trackUris) {
     logger.info(`Playlist "${playlistName}" created with ${trackUris.length} tracks.`);
 }
 
-const getTopTracks = async (artistId) => {
-    try {
-        const likedTracks = await getAllLikedTracks();
-        logger.debug(`Total liked tracks: ${likedTracks.length}`);
-
-        const artistTopTracks = likedTracks
-            .filter((item) => item.track.artists.some((artist) => artist.id === artistId))
-            .map((item) => item.track);
-
-        logger.debug(`Filtered tracks for artist ID ${artistId}: ${artistTopTracks.length}`);
-        return artistTopTracks;
-    } catch (error) {
-        logger.error(`Error fetching top tracks:, ${error.message}`);
-    }
-};
-
-const getArtistTopTracks = async (artistName) => {
-    try {
-        const artistId = await getArtistId(artistName);
-
-        if (!artistId) {
-            logger.debug(`Artist "${artistName}" not found.`);
-            return [];
-        }
-
-        const topTracks = await getTopTracks(artistId);
-
-        logger.debug(`Top tracks by ${artistName}:`);
-        topTracks.forEach((track, index) => {
-            logger.debug(`${index + 1}. ${track.name}`);
-        });
-
-        return topTracks;
-    } catch (error) {
-        logger.error(`Error fetching top tracks: ${error.message}`);
-    }
-};
-
 module.exports = {
-    getArtistTopTracks,
     getAccessTokenFromRefreshToken,
     createPlaylist,
+    getArtistId,
+    getAllLikedTracks,
     getUserId
 };

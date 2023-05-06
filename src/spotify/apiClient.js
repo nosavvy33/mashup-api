@@ -1,10 +1,8 @@
 const logger = require("../logger/logger");
 const axios = require('axios');
 
-// The singleton axios instance
 let apiClient;
 
-// Function to initialize the axios instance with the bearer token
 function initApiClient(bearerToken) {
     if (!apiClient) {
         apiClient = axios.create({
@@ -34,7 +32,6 @@ function initApiClient(bearerToken) {
     }
 }
 
-// Function to get the singleton axios instance
 function getApiClient() {
     if (!apiClient) {
         throw new Error('API client not initialized. Call initApiClient() first.');

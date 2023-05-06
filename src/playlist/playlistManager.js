@@ -23,8 +23,6 @@ async function manageCreatePlaylist(artistNames, playlistName, refreshToken) {
 
 function defaultPlaylistNameParser(artistNames) {
     const artists = artistNames.map(artist => artist.trim());
-
-    // If the user didn't provide a playlist name, create a default name
     const artistString = artists.join(', ');
     return `MashUp: ${artistString}`;
 }
