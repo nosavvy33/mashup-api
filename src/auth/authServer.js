@@ -4,6 +4,8 @@ const cookieParser = require("cookie-parser");
 const logger = require('../logger/logger');
 require("dotenv").config();
 
+const { GetRefreshedTokenRequest, GetAuthTokenFromCallbackRequest, GetLoginUrl } = require("../spotify/spotify-api-templates");
+
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectUri = "http://localhost:3000/callback";
@@ -23,48 +25,13 @@ const generateRandomString = (length) => {
     return text;
 };
 
-function generateAuthUrl(res) {
-    const state = generateRandomString(16);
-    res.cookie("spotify_auth_state", state);
-
-    const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
-
-    return "https://accounts.spotify.com/authorize?" +
-        "response_type=code&" +
-        "client_id=" +
-        clientId +
-        "&" +
-        "scope=" +
-        encodeURIComponent(scope) +
-        "&" +
-        "redirect_uri=" +
-        encodeURIComponent(redirectUri) +
-        "&" +
-        "state=" +
-        state
-}
-
 app.get("/login", (req, res) => {
     const state = generateRandomString(16);
     res.cookie("spotify_auth_state", state);
 
     const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
 
-    res.redirect(
-        "https://accounts.spotify.com/authorize?" +
-        "response_type=code&" +
-        "client_id=" +
-        clientId +
-        "&" +
-        "scope=" +
-        encodeURIComponent(scope) +
-        "&" +
-        "redirect_uri=" +
-        encodeURIComponent(redirectUri) +
-        "&" +
-        "state=" +
-        state
-    );
+    res.redirect(GetLoginUrl(scope, redirectUri, state, clientId));
 });
 
 function startAuthProcess() {
@@ -80,21 +47,7 @@ function startAuthProcess() {
                 res.clearCookie("spotify_auth_state");
 
                 try {
-                    const authResponse = await axios({
-                        method: "post",
-                        url: "https://accounts.spotify.com/api/token",
-                        params: {
-                            code: code,
-                            redirect_uri: redirectUri,
-                            grant_type: "authorization_code",
-                        },
-                        headers: {
-                            Authorization:
-                                "Basic " +
-                                Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                    });
+                    const authResponse = await axios(GetAuthTokenFromCallbackRequest(code, redirectUri, clientId, clientSecret));
 
                     const accessToken = authResponse.data.access_token;
                     const refreshToken = authResponse.data.refresh_token;
@@ -114,20 +67,7 @@ function startAuthProcess() {
 
 const getAccessToken = async (refreshToken) => {
     try {
-        const response = await axios({
-            method: "post",
-            url: "https://accounts.spotify.com/api/token",
-            params: {
-                grant_type: "refresh_token",
-                refresh_token: refreshToken,
-            },
-            headers: {
-                Authorization:
-                    "Basic " +
-                    Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        });
+        const response = await axios(GetRefreshedTokenRequest(refreshToken, clientId, clientSecret));
 
         if (response.status === 200 && response.data.access_token) {
             logger.info(`Retrieved accessToken with result ${response.status}`);
