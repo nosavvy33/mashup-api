@@ -41,8 +41,10 @@ const getArtistId = async (artistName) => {
     }
 };
 
+// TBR
 const getAllLikedTracks = async (offset = 0, limit = 50, allTracks = []) => {
     try {
+        logger.info(`getAllLikedTracks executed ${count++}`);
         const apiClient = getApiClient();
         const response = await apiClient(GetLikedTracksRequest(limit, offset));
 
@@ -58,6 +60,40 @@ const getAllLikedTracks = async (offset = 0, limit = 50, allTracks = []) => {
         logger.error(`Error fetching liked tracks:, ${error.message}`);
         return [];
     }
+};
+
+const getLikedTracks = async () => {
+    const limit = 50;
+    const firstBatchOffset = 0;
+
+    const apiClient = getApiClient();
+    const firstBatch = await apiClient(GetLikedTracksRequest(limit, firstBatchOffset));
+
+    logger.debug(`total saved trakcs ${firstBatch.data.total}`);
+
+    const totalTracks = firstBatch.data.total;
+    const tracks = firstBatch.data.items;
+
+    if (totalTracks <= limit) {
+        return tracks;
+    }
+
+    const requests = [];
+    for (let offset = limit; offset < totalTracks; offset += limit) {
+        requests.push(apiClient(GetLikedTracksRequest(limit, offset)));
+    }
+
+    logger.debug(`total requests ${requests.length}`);
+
+    const additionalBatches = await Promise.all(requests);
+
+    additionalBatches.forEach((batch) => {
+        tracks.push(...batch.data.items);
+    });
+
+    logger.debug(`total tracks ${tracks.length}`);
+
+    return tracks;
 };
 
 const createPlaylist = async (userId, playlistName, trackUris) => {
@@ -80,5 +116,6 @@ module.exports = {
     createPlaylist,
     getArtistId,
     getAllLikedTracks,
-    getUserId
+    getUserId,
+    getLikedTracks
 };

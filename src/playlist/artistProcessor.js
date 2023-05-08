@@ -1,11 +1,13 @@
 const { lastValueFrom, forkJoin } = require("rxjs");
-const { getAllLikedTracks, getArtistId } = require("../spotify/spotify-api");
+const { getArtistId, getLikedTracks } = require("../spotify/spotify-api");
 const logger = require('../logger/logger');
 
 const getTracksByArtists = async (artistNames) => {
+    const likedTracks = await fetchAllLikedTracks();
+
     const artistsTopTracks$ = artistNames.map(async (artistName) => {
         logger.debug(`Fetching top tracks for ${artistName}:`);
-        const topTracks = await getArtistTopTracks(artistName);
+        const topTracks = await getArtistTopTracks(likedTracks, artistName);
         return topTracks;
     });
 
@@ -13,42 +15,30 @@ const getTracksByArtists = async (artistNames) => {
     return allTopTracks.flat();
 }
 
-const getArtistTopTracks = async (artistName) => {
+const fetchAllLikedTracks = async () => {
     try {
-        const artistId = await getArtistId(artistName);
-
-        if (!artistId) {
-            logger.debug(`Artist "${artistName}" not found.`);
-            return [];
-        }
-
-        const topTracks = await getTopTracks(artistId);
-
-        logger.debug(`Top tracks by ${artistName}:`);
-        topTracks.forEach((track, index) => {
-            logger.debug(`${index + 1}. ${track.name}`);
-        });
-
-        return topTracks;
-    } catch (error) {
-        logger.error(`Error fetching top tracks: ${error.message}`);
-    }
-};
-
-const getTopTracks = async (artistId) => {
-    try {
-        const likedTracks = await getAllLikedTracks();
+        const likedTracks = await getLikedTracks();
         logger.debug(`Total liked tracks: ${likedTracks.length}`);
-
-        const artistTopTracks = likedTracks
-            .filter((item) => item.track.artists.some((artist) => artist.id === artistId))
-            .map((item) => item.track);
-
-        logger.debug(`Filtered tracks for artist ID ${artistId}: ${artistTopTracks.length}`);
-        return artistTopTracks;
+        return likedTracks;
     } catch (error) {
         logger.error(`Error fetching top tracks:, ${error.message}`);
     }
+}
+
+const getArtistTopTracks = async (likedTracks, artistName) => {
+    const artistId = await getArtistId(artistName);
+
+    if (!artistId) {
+        logger.debug(`Artist "${artistName}" not found.`);
+        return [];
+    }
+
+    const artistTopTracks = likedTracks
+        .filter((item) => item.track.artists.some((artist) => artist.id === artistId))
+        .map((item) => item.track);
+
+    logger.debug(`Filtered tracks for artist ID ${artistId}: ${artistTopTracks.length}`);
+    return artistTopTracks;
 };
 
 const getRandomTracks = (tracks, limit = 10) => {
