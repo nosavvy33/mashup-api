@@ -87,6 +87,5 @@ app.listen(3000, () => {
 
 module.exports = {
     getAccessToken,
-    startAuthProcess,
-    generateAuthUrl
+    startAuthProcess
 };
