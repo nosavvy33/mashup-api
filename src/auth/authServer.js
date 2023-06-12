@@ -8,7 +8,9 @@ const { GetRefreshedTokenRequest, GetAuthTokenFromCallbackRequest, GetLoginUrl }
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirectUri = "http://localhost:3000/callback";
+// const redirectUri = "http://localhost:3000/callback";
+const redirectUri = `${process.env.CALLBACK_URL}/callback`;
+
 
 const app = express();
 app.use(cookieParser());
