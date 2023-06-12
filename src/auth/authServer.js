@@ -34,6 +34,33 @@ app.get("/login", (req, res) => {
     res.redirect(GetLoginUrl(scope, redirectUri, state, clientId));
 });
 
+app.get("/callback", async (req, res) => {
+    const code = req.query.code || null;
+    const state = req.query.state || null;
+    const storedState = req.cookies ? req.cookies.spotify_auth_state : null;
+
+    if (state === null || state !== storedState) {
+        res.redirect("/#/error/state_mismatch");
+    } else {
+        res.clearCookie("spotify_auth_state");
+
+        try {
+            const authResponse = await axios(GetAuthTokenFromCallbackRequest(code, redirectUri, clientId, clientSecret));
+
+            const accessToken = authResponse.data.access_token;
+            const refreshToken = authResponse.data.refresh_token;
+
+            // Resolve the promise with the access token and refresh token
+            // resolve({ accessToken, refreshToken });
+
+            res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
+        } catch (error) {
+            logger.error(`Error fetching access token:, ${error.message}`);
+            res.redirect("/#/error/invalid_token");
+        }
+    }
+});
+
 function startAuthProcess() {
     return new Promise((resolve) => {
         app.get("/callback", async (req, res) => {
