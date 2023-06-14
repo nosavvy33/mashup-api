@@ -27,8 +27,8 @@ const generateRandomString = (length) => {
     return text;
 };
 
-app.get("/home", (req, res) => {
-    res.send(`<h1>Hello </h1><button onclick="/login"/>`);
+app.get("/", (req, res) => {
+    res.send(`<h1>Hello </h1><a href="/login">Login</button>`);
 });
 
 app.get("/login", (req, res) => {
