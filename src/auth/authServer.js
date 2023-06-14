@@ -27,6 +27,10 @@ const generateRandomString = (length) => {
     return text;
 };
 
+app.get("/home", (req, res) => {
+    res.send(`<h1>Hello </h1><button onclick="/login"/>`);
+});
+
 app.get("/login", (req, res) => {
     const state = generateRandomString(16);
     res.cookie("spotify_auth_state", state);
