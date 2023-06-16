@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Artist Input Form</title>
+</head>
+
+<body>
+    <form action="/generatePlaylist" method="POST">
+        <div id="artistInputs">
+            <label for="artist1">Artist: </label>
+            <input type="text" id="artist1" name="artist1" maxlength="50"><br>
+        </div>
+        <button type="button" id="addArtist">Add Another Artist</button><br>
+
+        <p id="limitMessage" style="display: none;">Artist limit of 5 reached.</p>
+
+        <label for="playlistName">Playlist Name: </label>
+        <input type="text" id="playlistName" name="playlistName" maxlength="50"><br>
+
+        <input type="submit" value="Login & Generate Playlist">
+    </form>
+
+    <script>
+        let artistCount = 1;
+        document.getElementById('addArtist').addEventListener('click', function () {
+            if (artistCount < 5) {
+                artistCount++;
+                const artistInputs = document.getElementById('artistInputs');
+                const newLabel = document.createElement("label");
+                newLabel.for = "artist" + artistCount;
+                newLabel.textContent = "Artist: ";
+                const newInput = document.createElement("input");
+                newInput.type = "text";
+                newInput.id = "artist" + artistCount;
+                newInput.name = "artist" + artistCount;
+                newInput.maxLength = "50";
+                artistInputs.appendChild(newLabel);
+                artistInputs.appendChild(newInput);
+                artistInputs.appendChild(document.createElement("br"));
+            } else {
+                document.getElementById('limitMessage').style.display = "block";
+            }
+        });
+    </script>
+</body>
+
+</html>
