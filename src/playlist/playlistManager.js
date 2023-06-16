@@ -10,7 +10,7 @@ async function manageCreatePlaylist(artistNames, playlistName, refreshToken) {
     logger.info(`Starting to process playlist ${finalPlaylistName}`);
 
     // refactor use of accessToken and refreshToken like in a spotify-api-manager
-    const updatedAccessToken = await getAccessTokenFromRefreshToken(refreshToken);
+    const updatedAccessToken = refreshToken//await getAccessTokenFromRefreshToken(refreshToken);
     initApiClient(updatedAccessToken);
     const userId = await getUserId();
 
