@@ -11,9 +11,52 @@ const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 // const redirectUri = "http://localhost:3000/callback";
 const redirectUri = `${process.env.CALLBACK_URL}/callback`;
 
-
 const app = express();
 app.use(cookieParser());
+
+
+const { manageCreatePlaylist } = require("../playlist/playlistManager");
+const path = require('path');
+const { body, validationResult } = require('express-validator');
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+app.get('/test', function (req, res) {
+    res.sendFile(path.join(__dirname, '/index.html'));
+});
+
+app.post('/generatePlaylist',
+    // Validation middleware
+    [
+        body('playlistName').isLength({ max: 50 }).withMessage('Playlist name must be at most 50 characters long.'),
+        body('artist1').isLength({ max: 50 }).not().contains(',').withMessage('Artist names must be at most 50 characters long and cannot contain commas.'),
+        body('artist2').optional().isLength({ max: 50 }).not().contains(',').withMessage('Artist names must be at most 50 characters long and cannot contain commas.'),
+        body('artist3').optional().isLength({ max: 50 }).not().contains(',').withMessage('Artist names must be at most 50 characters long and cannot contain commas.'),
+        body('artist4').optional().isLength({ max: 50 }).not().contains(',').withMessage('Artist names must be at most 50 characters long and cannot contain commas.'),
+        body('artist5').optional().isLength({ max: 50 }).not().contains(',').withMessage('Artist names must be at most 50 characters long and cannot contain commas.'),
+    ],
+    (req, res) => {
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        // If validation passed, retrieve values and save in variables
+        const playlistName = req.body.playlistName;
+        const artist1 = req.body.artist1;
+        const artist2 = req.body.artist2 || null;
+        const artist3 = req.body.artist3 || null;
+        const artist4 = req.body.artist4 || null;
+        const artist5 = req.body.artist5 || null;
+
+        // ... continue processing the data
+
+        res.send(`Data received. ${playlistName} ${artist1} ${artist5}`);
+    }
+);
+
+
+
 
 const generateRandomString = (length) => {
     let text = "";
@@ -59,7 +102,12 @@ app.get("/callback", async (req, res) => {
             // Resolve the promise with the access token and refresh token
             // resolve({ accessToken, refreshToken });
 
-            res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
+            // res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
+
+            await manageCreatePlaylist(["kanye west", "kendrick lamar"], "test", accessToken);
+
+            res.send(`Playlist created`);
+
         } catch (error) {
             logger.error(`Error fetching access token:, ${error.message}`);
             res.redirect("/#/error/invalid_token");
