@@ -20,9 +20,17 @@ const path = require('path');
 const { body, validationResult } = require('express-validator');
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-app.get('/test', function (req, res) {
+app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, '/index.html'));
 });
+
+const defaultPlaylistName = "MashUp Playlist: ";
+var playlistName = "";
+var artist1 = "";
+var artist2 = "";
+var artist3 = "";
+var artist4 = "";
+var artist5 = "";
 
 app.post('/generatePlaylist',
     // Validation middleware
@@ -42,37 +50,24 @@ app.post('/generatePlaylist',
         }
 
         // If validation passed, retrieve values and save in variables
-        const playlistName = req.body.playlistName;
-        const artist1 = req.body.artist1;
-        const artist2 = req.body.artist2 || null;
-        const artist3 = req.body.artist3 || null;
-        const artist4 = req.body.artist4 || null;
-        const artist5 = req.body.artist5 || null;
+        artist1 = req.body.artist1;
+        artist2 = req.body.artist2 || null;
+        artist3 = req.body.artist3 || null;
+        artist4 = req.body.artist4 || null;
+        artist5 = req.body.artist5 || null;
+        playlistName = req.body.playlistName.length > 0 ? req.body.playlistName : `${defaultPlaylistNameParser([artist1, artist2])}`;
 
         // ... continue processing the data
 
-        res.send(`Data received. ${playlistName} ${artist1} ${artist5}`);
+        // res.send(`Data received. ${playlistName}`);
+        const state = generateRandomString(16);
+        res.cookie("spotify_auth_state", state);
+
+        const scope = "user-top-read user-library-read playlist-modify-public playlist-modify-private";
+
+        res.redirect(GetLoginUrl(scope, redirectUri, state, clientId));
     }
 );
-
-
-
-
-const generateRandomString = (length) => {
-    let text = "";
-    const possible =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for (let i = 0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    return text;
-};
-
-app.get("/", (req, res) => {
-    res.send(`<h1>Hello </h1><a href="/login">Login</button>`);
-});
 
 app.get("/login", (req, res) => {
     const state = generateRandomString(16);
@@ -104,6 +99,40 @@ app.get("/callback", async (req, res) => {
 
             // res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
 
+            await manageCreatePlaylist([artist1, artist2], playlistName, accessToken);
+
+            res.send(`Playlist created`);
+
+            cleanUp();
+
+        } catch (error) {
+            logger.error(`Error fetching access token:, ${error.message}`);
+            res.redirect("/#/error/invalid_token");
+        }
+    }
+});
+
+app.get("/callback-old", async (req, res) => {
+    const code = req.query.code || null;
+    const state = req.query.state || null;
+    const storedState = req.cookies ? req.cookies.spotify_auth_state : null;
+
+    if (state === null || state !== storedState) {
+        res.redirect("/#/error/state_mismatch");
+    } else {
+        res.clearCookie("spotify_auth_state");
+
+        try {
+            const authResponse = await axios(GetAuthTokenFromCallbackRequest(code, redirectUri, clientId, clientSecret));
+
+            const accessToken = authResponse.data.access_token;
+            const refreshToken = authResponse.data.refresh_token;
+
+            // Resolve the promise with the access token and refresh token
+            // resolve({ accessToken, refreshToken });
+
+            // res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
+
             await manageCreatePlaylist(["kanye west", "kendrick lamar"], "test", accessToken);
 
             res.send(`Playlist created`);
@@ -114,6 +143,33 @@ app.get("/callback", async (req, res) => {
         }
     }
 });
+
+function cleanUp() {
+    playlistName = "";
+    artist1 = "";
+    artist2 = "";
+    artist3 = "";
+    artist4 = "";
+    artist5 = "";
+}
+
+function defaultPlaylistNameParser(artistNames) {
+    const artists = artistNames.map(artist => artist.trim());
+    const artistString = artists.join(', ');
+    return `MashUp: ${artistString}`;
+}
+
+const generateRandomString = (length) => {
+    let text = "";
+    const possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (let i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
+};
 
 function startAuthProcess() {
     return new Promise((resolve) => {
