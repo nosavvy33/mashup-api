@@ -8,7 +8,6 @@ const { GetRefreshedTokenRequest, GetAuthTokenFromCallbackRequest, GetLoginUrl }
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-// const redirectUri = "http://localhost:3000/callback";
 const redirectUri = `${process.env.CALLBACK_URL}/callback`;
 
 const app = express();
@@ -26,11 +25,7 @@ app.get('/', function (req, res) {
 
 const defaultPlaylistName = "MashUp Playlist: ";
 var playlistName = "";
-var artist1 = "";
-var artist2 = "";
-var artist3 = "";
-var artist4 = "";
-var artist5 = "";
+var artists = [];
 
 app.post('/generatePlaylist',
     // Validation middleware
@@ -49,17 +44,11 @@ app.post('/generatePlaylist',
             return res.status(400).json({ errors: errors.array() });
         }
 
-        // If validation passed, retrieve values and save in variables
-        artist1 = req.body.artist1;
-        artist2 = req.body.artist2 || null;
-        artist3 = req.body.artist3 || null;
-        artist4 = req.body.artist4 || null;
-        artist5 = req.body.artist5 || null;
-        playlistName = req.body.playlistName.length > 0 ? req.body.playlistName : `${defaultPlaylistNameParser([artist1, artist2])}`;
+        artists.push(req.body.artist1, req.body.artist2 || null, req.body.artist3 || null, req.body.artist4 || null, req.body.artist5 || null);
+        artists = artists.filter(x => x != null);
+        playlistName = req.body.playlistName.length > 0 ? req.body.playlistName : `${defaultPlaylistNameParser(artists)}`;
 
-        // ... continue processing the data
-
-        // res.send(`Data received. ${playlistName}`);
+        // res.send(`Data received. ${artists}`);
         const state = generateRandomString(16);
         res.cookie("spotify_auth_state", state);
 
@@ -99,7 +88,7 @@ app.get("/callback", async (req, res) => {
 
             // res.send(`Access and refresh tokens fetched successfully. You can close this window. ${accessToken}`);
 
-            await manageCreatePlaylist([artist1, artist2], playlistName, accessToken);
+            await manageCreatePlaylist(artists, playlistName, accessToken);
 
             res.send(`Playlist created`);
 
@@ -146,11 +135,7 @@ app.get("/callback-old", async (req, res) => {
 
 function cleanUp() {
     playlistName = "";
-    artist1 = "";
-    artist2 = "";
-    artist3 = "";
-    artist4 = "";
-    artist5 = "";
+    artists = [];
 }
 
 function defaultPlaylistNameParser(artistNames) {
