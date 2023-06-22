@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card text-center">
+        <div class="card-body">
+            <h5 class="card-title">Oops, something went wrong!</h5>
+            <p class="card-text">Please try again.</p>
+            <a href="/" class="btn btn-primary">Return to Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const card = document.querySelector('.card');
+        card.classList.add('animate__animated', 'animate__shakeX');
+    </script>
+</body>
+
+</html>
