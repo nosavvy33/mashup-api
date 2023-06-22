@@ -101,15 +101,21 @@ app.get("/callback", async (req, res) => {
         }
     }
 });
+const fs = require('fs/promises');
+const logsFilePath = path.join(__dirname, '..', '..', 'logs.txt');
 
 app.get('/logs', async (req, res) => {
     try {
-        const data = await fs.readFile(path.join(__dirname, 'logs.txt'), 'utf-8');
+        const data = await fs.readFile(path.join(logsFilePath), 'utf-8');
         res.send(`<pre>${data}</pre>`);
     } catch (err) {
         console.error(err);
         res.status(500).send('Error reading logs.');
     }
+});
+
+app.get("/flushLogs", async (req, res) => {
+    await flushLogs();
 });
 
 app.get("/callback-old", async (req, res) => {
@@ -147,6 +153,15 @@ app.get("/callback-old", async (req, res) => {
 function cleanUp() {
     playlistName = "";
     artists = [];
+}
+
+async function flushLogs() {
+    try {
+        await fs.writeFile(logsFilePath, '');
+        console.log('Logs flushed successfully');
+    } catch (error) {
+        console.error('Error occurred while flushing logs: ', error);
+    }
 }
 
 function defaultPlaylistNameParser(artistNames) {
@@ -214,7 +229,7 @@ const getAccessToken = async (refreshToken) => {
     }
 };
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
     logger.debug("Server is running on port 3000");
 });
 
