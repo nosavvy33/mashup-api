@@ -3,86 +3,63 @@
 
 <head>
     <title>Spotify MashUp Playlist Generator</title>
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
 
-<body>
+        .container {
+            display: flex;
+            justify-content: center;
+            height: 100%;
+        }
 
-    <h1>Spotify MashUp Playlist Generator</h1>
-
-    <button onclick="toggleInstructions()">Toggle Instructions</button>
-    <div id="instructions" style="display: none;">
-
-        <h2>Instructions</h2>
-
-        <p>
-            To get started, please follow the steps below:
-        </p>
-
-        <ol>
-            <li>Enter the names of your favorite artists in the provided fields. Please note that you can enter up
-                to
-                five artists and each artist's name should be less than 50 characters long and should not contain
-                any
-                commas.</li>
-            <li>Next, enter a name for your playlist in the provided field. The playlist name should also be less
-                than
-                50 characters long.</li>
-            <li>Click on the 'Login & Generate Playlist' button to generate your playlist.</li>
-        </ol>
-
-        <h2>What happens next?</h2>
-
-        <p>
-            Once you click on the 'Login & Generate Playlist' button, our system will create a playlist based on
-            your
-            liked
-            artists' tracks you have entered.
-        </p>
-
-        <p>
-            Made with &#x2764; from <a href="https://github.com/nosavvy33/mashup-api" target="_blank">nosavvy's github
-                repo</a>
-        </p>
-    </div>
-    <br>
-    <form action="/generatePlaylist" method="POST">
-        <div id="artistInputs">
-            <label for="artist1">Artist: </label>
-            <input type="text" id="artist1" name="artist1" maxlength="50"><br>
-        </div>
-        <button type="button" id="addArtist">Add Another Artist</button><br>
-
-        <p id="limitMessage" style="display: none;">Artist limit of 5 reached.</p>
-
-        <label for="playlistName">Playlist Name: </label>
-        <input type="text" id="playlistName" name="playlistName" maxlength="50"><br>
-
-        <input type="submit" value="Login & Generate Playlist">
-    </form>
-
+        .card {
+            width: 50%;
+            margin: auto;
+        }
+    </style>
     <script>
         let artistCount = 1;
-        document.getElementById('addArtist').addEventListener('click', function () {
+
+        function addArtistRow() {
+            console.log("gaa");
             if (artistCount < 5) {
                 artistCount++;
                 const artistInputs = document.getElementById('artistInputs');
-                const newLabel = document.createElement("label");
-                newLabel.for = "artist" + artistCount;
-                newLabel.textContent = "Artist: ";
-                const newInput = document.createElement("input");
-                newInput.type = "text";
-                newInput.id = "artist" + artistCount;
-                newInput.name = "artist" + artistCount;
-                newInput.maxLength = "50";
-                artistInputs.appendChild(newLabel);
-                artistInputs.appendChild(newInput);
-                artistInputs.appendChild(document.createElement("br"));
+                const newArtistDiv = document.createElement('div');
+                newArtistDiv.setAttribute('class', 'input-field');
+
+                const newArtistField = document.createElement('input');
+                newArtistField.setAttribute('type', 'text');
+                newArtistField.setAttribute('id', `artist${artistCount}`);
+                newArtistField.setAttribute('name', `artist${artistCount}`);
+                newArtistField.setAttribute('class', 'validate');
+                newArtistField.setAttribute('maxlength', '50'); // Limit input to 50 characters
+
+                const newArtistLabel = document.createElement('label');
+                newArtistLabel.setAttribute('for', `artist${artistCount}`);
+                newArtistLabel.textContent = 'Artist';
+
+                // Append the input field and label to the new div
+                newArtistDiv.appendChild(newArtistField);
+                newArtistDiv.appendChild(newArtistLabel);
+
+                // Append the new div to the container
+                artistInputs.appendChild(newArtistDiv);
+                // artistInputs.appendChild(document.createElement("br"));
             } else {
                 document.getElementById('limitMessage').style.display = "block";
             }
-        });
+        }
 
         function toggleInstructions() {
+            console.log(document.getElementById('addArtist'))
             const instructions = document.getElementById('instructions');
             if (instructions.style.display === "none") {
                 instructions.style.display = "block";
@@ -91,6 +68,53 @@
             }
         }
     </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title center-align">Playlist Generator</span>
+                <p class="center-align">Generate a playlist based on your favourite artists.</p>
+
+                <button onclick="toggleInstructions()" class="btn waves-effect waves-light blue-grey darken-1">Toggle
+                    Instructions</button>
+
+                <div id="instructions" style="display: none;">
+                    <h2>Instructions</h2>
+                    <p>Enter the names of up to 5 artists and a name for your playlist. Names must be alphanumeric and
+                        less than 50 characters.</p>
+                    <p>Click "Generate Playlist" when you're done. You can only generate 100 playlists per day.</p>
+                </div>
+
+                <form method="POST" action="/generatePlaylist">
+                    <div id="artistInputs">
+                        <div class="input-field">
+                            <input id="artist1" name="artist1" type="text" class="validate" maxlength="50">
+                            <label for="artist1">Artist</label>
+                        </div>
+                    </div>
+                    <button type="button" id="addArtist" onclick="addArtistRow()"
+                        class="btn waves-effect waves-light blue-grey darken-1">Add
+                        another artist</button>
+                    <p id="limitMessage" style="display: none; color: red;">Artist limit of 5 reached.</p>
+
+                    <div class="input-field">
+                        <input id="playlistName" name="playlistName" type="text" class="validate" maxlength="50">
+                        <label for="playlistName">Playlist Name</label>
+                    </div>
+                    <button type="submit" class="btn waves-effect waves-light blue darken-1">Generate Playlist</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
+
+<!-- <footer>
+    <p>
+        Made with &#x2764; from <a href="https://github.com/nosavvy33/mashup-api" target="_blank">nosavvy's github
+            repo</a>
+    </p>
+</footer>  -->
 
 </html>
