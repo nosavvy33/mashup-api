@@ -68,9 +68,9 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/callback", async (req, res) => {
-    const code = req.query.code || null;
-    const state = req.query.state || null;
-    const storedState = req.cookies ? req.cookies.spotify_auth_state : null;
+    let code = req.query.code || null;
+    let state = req.query.state || null;
+    let storedState = req.cookies ? req.cookies.spotify_auth_state : null;
 
     if (state === null || state !== storedState) {
         res.redirect("/#/error/state_mismatch");
@@ -78,10 +78,10 @@ app.get("/callback", async (req, res) => {
         res.clearCookie("spotify_auth_state");
 
         try {
-            const authResponse = await axios(GetAuthTokenFromCallbackRequest(code, redirectUri, clientId, clientSecret));
+            let authResponse = await axios(GetAuthTokenFromCallbackRequest(code, redirectUri, clientId, clientSecret));
 
-            const accessToken = authResponse.data.access_token;
-            const refreshToken = authResponse.data.refresh_token;
+            let accessToken = authResponse.data.access_token;
+            let refreshToken = authResponse.data.refresh_token;
 
             // Resolve the promise with the access token and refresh token
             // resolve({ accessToken, refreshToken });
@@ -90,14 +90,25 @@ app.get("/callback", async (req, res) => {
 
             await manageCreatePlaylist(artists, playlistName, accessToken);
 
-            res.send(`Playlist created`);
-
-            cleanUp();
+            res.sendFile(path.join(__dirname, '/success.html'));
 
         } catch (error) {
             logger.error(`Error fetching access token:, ${error.message}`);
-            res.redirect("/#/error/invalid_token");
+            // res.redirect("/#/error/invalid_token");
+            res.sendFile(path.join(__dirname, '/failure.html'));
+        } finally {
+            cleanUp();
         }
+    }
+});
+
+app.get('/logs', async (req, res) => {
+    try {
+        const data = await fs.readFile(path.join(__dirname, 'logs.txt'), 'utf-8');
+        res.send(`<pre>${data}</pre>`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error reading logs.');
     }
 });
 
